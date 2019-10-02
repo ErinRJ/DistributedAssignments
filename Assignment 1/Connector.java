@@ -75,6 +75,7 @@ public class Connector implements Runnable {
 					database.remove(i);
 					serializeDb();
 					System.out.println(name + " has been removed from the database");
+					break;
 				}catch(IOException e) {
 					e.printStackTrace();
 				}
@@ -91,6 +92,7 @@ public class Connector implements Runnable {
 				out.println(tempString);
 				doesExist = true;
 				System.out.println(tempString + " :has been found and sent to client");
+				break;
 			}
 		}
 		if (!doesExist) {
