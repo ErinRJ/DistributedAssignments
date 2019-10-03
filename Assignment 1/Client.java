@@ -40,9 +40,13 @@ public class Client extends JFrame implements ActionListener {
 	
 	static JFrame userInfoPage;
 	static JFrame connectPage;
+	static JFrame loginPage;
 	static JFrame addPersonPage;
 	static JFrame delPersonPage;
 	static JFrame findPersonPage;
+	
+	static JTextArea username;
+	static JTextArea password;
 	
 	static JTextArea addnametxt;
 	static JTextArea delnametxt;
@@ -66,8 +70,9 @@ public class Client extends JFrame implements ActionListener {
 		PrintStream out = null;
 		
 		// create GUI pages
-		connectPage = new JFrame("AbDominate! Fitness Client");
-		userInfoPage = new JFrame("AbDominate! Fitness Client");
+		connectPage = new JFrame("AbDominate! Fitness Client - Connect");
+		userInfoPage = new JFrame("AbDominate! Fitness Client - Home");
+		loginPage = new JFrame("AbDominate! Fitness Client - Login");
 		addPersonPage = new JFrame("AbDominate! Fitness Client - Add New Member");
 		delPersonPage = new JFrame("AbDominate! Fitness Client - Delete Member");
 		findPersonPage = new JFrame("AbDominate! Fitness Client - Member Information");
@@ -75,7 +80,8 @@ public class Client extends JFrame implements ActionListener {
 		connectPage.setSize(800,300);
 		userInfoPage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		userInfoPage.setSize(800,300);
-		
+		loginPage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		loginPage.setSize(800,300);
 		addPersonPage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addPersonPage.setSize(1500,300);
 		delPersonPage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,6 +98,7 @@ public class Client extends JFrame implements ActionListener {
 		createAddPersonPage(fc);
 		createDelPersonPage(fc);
 		createFindPersonPage(fc);
+		createLoginPage(fc);
 		
 		connectPage.setVisible(true);
 	}
@@ -127,6 +134,31 @@ public class Client extends JFrame implements ActionListener {
 		//Specify the menu bar should be at the top
 		connectPage.getContentPane().add(BorderLayout.NORTH, portPanel);
 		connectPage.getContentPane().add(BorderLayout.CENTER, statusP);
+		
+		return;
+	}
+	
+	public static void createLoginPage(Client fc) {
+		//get connection information
+		JPanel inputPanel = new JPanel();
+		
+		JLabel usernameL = new JLabel("Username: ");
+		username = new JTextArea(1, 4);
+		JLabel passwordL = new JLabel("Password: ");
+		password = new JTextArea(1,8);
+		JButton loginButton = new JButton("Login");
+		loginButton.addActionListener(fc);
+		
+		inputPanel.add(usernameL);
+		inputPanel.add(username);
+		inputPanel.add(passwordL);
+		inputPanel.add(password);
+		inputPanel.add(loginButton);
+		
+		loginPage.add(inputPanel);
+	
+		//Specify the menu bar should be at the top
+		loginPage.getContentPane().add(BorderLayout.CENTER, inputPanel);
 		
 		return;
 	}
@@ -328,6 +360,24 @@ public class Client extends JFrame implements ActionListener {
 				e.printStackTrace();
 			}
 		}	
+		else if(event.contentEquals("Login")) {
+			//get username and password values
+			String name = username.getText();
+			String pass = password.getText();
+			String combined = "LOGIN," + name + "," + pass;
+			ps.println(combined);
+			
+			try {
+				String result = in.readLine();
+				System.out.println("Login result: " + result);
+				if(result.equals("Access granted")){
+					loginPage.dispose();
+					userInfoPage.setVisible(true);
+				}
+			}catch(IOException e) {
+				e.printStackTrace();
+			}
+		}	
 		else if(event.contentEquals("Disconnect")) {
 			try {
 				userInfoPage.dispose();
@@ -417,7 +467,7 @@ public class Client extends JFrame implements ActionListener {
 		try {
 			myClient = new Socket(host, port);
 			connectPage.dispose();
-			userInfoPage.setVisible(true);
+			loginPage.setVisible(true);
 			ps = new PrintStream(myClient.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(myClient.getInputStream()));
 			System.out.println("Client connected to server at: " + myClient);
