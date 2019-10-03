@@ -31,7 +31,7 @@ public class Connector implements Runnable {
 	}
 	
 	public void checkExists() throws IOException, FileNotFoundException, ClassNotFoundException{
-		// Open existing database, if it doesn't exist, create one
+		// Open existing fitness patrons database, if it doesn't exist, create one
 		File tempfile = new File("fitnessDB.out");
 		if(!tempfile.exists()) {
 			System.out.println("Creating a new database: fitnessDB.out");
@@ -43,7 +43,9 @@ public class Connector implements Runnable {
 			fis = new FileInputStream("fitnessDB.out");
 			ois = new ObjectInputStream(fis);
 			database = (ArrayList) ois.readObject();
-		}			
+		}		
+		
+		//also create an employees database?
 	}
 	
 	public void filter(String text, BufferedReader in, PrintStream out) throws IOException{
@@ -111,7 +113,6 @@ public class Connector implements Runnable {
 	public void run(){
 		try {
 			System.out.println("client connected: " + client);
-			checkExists();
 			
 			// STARTUP COMMUNICATION CHANNELS
 
@@ -119,13 +120,18 @@ public class Connector implements Runnable {
 			PrintStream out = null;
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			out = new PrintStream(client.getOutputStream());
+			
+			//CHECK LOGIN INFORMATION
+			//accept input
+			//filter to login()
+			//within login(), call generateHash(), bytestoStringHex(), and check values against employees class
+			
+			checkExists();
 			while(true) {
 				String text = in.readLine();
 				System.out.println("Received: " + text);
 				//determine the command
 				filter(text, in, out);
-				System.out.println("Remaining arraylist database: ");
-				System.out.println(Arrays.toString(database.toArray()));
 			}	
 
 			
