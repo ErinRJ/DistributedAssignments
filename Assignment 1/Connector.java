@@ -22,16 +22,17 @@ import java.util.ArrayList;
 
 public class Connector implements Runnable {
 	static Socket client = null;
-	//initialize input streams from the serialized arraylist
+	//initialize input and output streams from the serialized Person arraylist
 	static FileInputStream fis =null;
 	static ObjectInputStream ois = null;
-	
 	static FileOutputStream fos = null;
 	static ObjectOutputStream oos = null;
 	
+	//initialize only input streams from serialized employee arraylist
 	static ObjectInputStream employee_ois = null;
 	static FileInputStream employee_fis = null;
 	
+	//set arraylists of people and employees
 	static ArrayList<Person> database = null;
 	static ArrayList<Employees> empdb = null;
 	
@@ -56,21 +57,14 @@ public class Connector implements Runnable {
 			System.out.println("Connecting to Employee database");
 		}	
 		
-		File emp_tempfile= new File("Employees.out");
-		if(!tempfile.exists()) {
-			System.out.println("Creating a new database: Employees.out");
-			empdb= new ArrayList<Employees>();
-			serializeDb();
-		}
-		else {
-			//do the same for the serialized arraylist of employee objects
-			employee_fis = new FileInputStream("Employees.out");
-			employee_ois = new ObjectInputStream(employee_fis);
-			empdb = (ArrayList) employee_ois.readObject();
-		}	
+		// open and read from the existing employees arraylist
+		employee_fis = new FileInputStream("Employees.out");
+		employee_ois = new ObjectInputStream(employee_fis);
+		empdb = (ArrayList) employee_ois.readObject();
 		
 	}
 	
+	//determine the command sent from the Client
 	public void filter(String text, BufferedReader in, PrintStream out) throws IOException, NoSuchAlgorithmException, ClassNotFoundException{
 		//split the string by comma delimiter
 		String[] personInfo = text.split(",");
@@ -96,18 +90,26 @@ public class Connector implements Runnable {
 	}
 	
 	public static void deletePerson(String name, BufferedReader in, PrintStream out) {
-		System.out.println("Looking for person to delete...");
+		boolean isDeleted = false;
 		for(int i=0; i < database.size(); i++) {
 			if((database.get(i).name).equals(name)) {
 				try {
+					System.out.println("Currently looking at " + database.get(i).name);
 					database.remove(i);
 					serializeDb();
 					System.out.println(name + " has been removed from the database");
+					isDeleted = true;
 					break;
 				}catch(IOException e) {
 					e.printStackTrace();
 				}
 			}
+		}
+		if(isDeleted) {
+			out.println("Removal success");
+		}
+		else {
+			out.println("Could not find member");
 		}
 	}
 	
@@ -214,7 +216,8 @@ public class Connector implements Runnable {
 				}catch(NoSuchAlgorithmException e) {
 					e.printStackTrace();
 				}
-			}	
+			}
+			
 
 			
 		}catch(IOException | ClassNotFoundException e) {

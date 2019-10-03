@@ -18,6 +18,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileSystemView;
@@ -46,7 +47,8 @@ public class Client extends JFrame implements ActionListener {
 	static JFrame findPersonPage;
 	
 	static JTextArea username;
-	static JTextArea password;
+	static JPasswordField password;
+	static JLabel connection_result;
 	
 	static JTextArea addnametxt;
 	static JTextArea delnametxt;
@@ -65,6 +67,7 @@ public class Client extends JFrame implements ActionListener {
 	
 	static JLabel delresults;
 	static JLabel addresults;
+	
 	
 	public static void main(String[] args) throws UnknownHostException, IOException {
 		PrintStream out = null;
@@ -89,7 +92,7 @@ public class Client extends JFrame implements ActionListener {
 		findPersonPage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		findPersonPage.setSize(800,300);
 		
-	
+		// create action listener for all button presses
 		Client fc = new Client();
 		
 		//create all of the frames
@@ -141,11 +144,12 @@ public class Client extends JFrame implements ActionListener {
 	public static void createLoginPage(Client fc) {
 		//get connection information
 		JPanel inputPanel = new JPanel();
+		JPanel resultPanel = new JPanel();
 		
 		JLabel usernameL = new JLabel("Username: ");
 		username = new JTextArea(1, 4);
 		JLabel passwordL = new JLabel("Password: ");
-		password = new JTextArea(1,8);
+		password = new JPasswordField("", 8);
 		JButton loginButton = new JButton("Login");
 		loginButton.addActionListener(fc);
 		
@@ -155,10 +159,14 @@ public class Client extends JFrame implements ActionListener {
 		inputPanel.add(password);
 		inputPanel.add(loginButton);
 		
+		connection_result = new JLabel("");
+		resultPanel.add(connection_result);
+		
 		loginPage.add(inputPanel);
-	
+		loginPage.add(resultPanel);
 		//Specify the menu bar should be at the top
 		loginPage.getContentPane().add(BorderLayout.CENTER, inputPanel);
+		loginPage.getContentPane().add(BorderLayout.SOUTH, resultPanel);
 		
 		return;
 	}
@@ -197,7 +205,7 @@ public class Client extends JFrame implements ActionListener {
 	}
 	
 	public static void createAddPersonPage(Client fc) {		
-		//5 text fields for Name, Address, Phone, Email, Membership type
+		//4 text fields for Name, Address, Phone, Email + combobox for Membership type
 		//button for adding person
 		//back button
 		JPanel mainP = new JPanel();
@@ -207,6 +215,7 @@ public class Client extends JFrame implements ActionListener {
 		// create a combo box with the fixed array:
 		comboMemberships = new JComboBox<String>(memTypes);
 		
+		// create text areas for input
 		JLabel nameL = new JLabel("Name: ");
 		addnametxt = new JTextArea(1, 15);
 		
@@ -224,7 +233,7 @@ public class Client extends JFrame implements ActionListener {
 		JButton addbtn = new JButton("Add New Member");
 		addbtn.addActionListener(fc);  
 		
-		
+		//add the fields to the main panel
 		mainP.add(nameL);
 		mainP.add(addnametxt);
 		mainP.add(addressL);
@@ -241,15 +250,17 @@ public class Client extends JFrame implements ActionListener {
 		JPanel resultsP = new JPanel();
 		addresults = new JLabel("");
 		resultsP.add(addresults);
-				
 		
+		//back button
 		JPanel backP = new JPanel();
-		JButton backbtn = new JButton("Back");
-		backbtn.addActionListener(fc);
-		backP.add(backbtn);
+		JButton back = new JButton("Back");
+		back.addActionListener(fc);  
+		backP.add(back);
 		
+		//add panels to the addPersonPage frame
 		addPersonPage.add(mainP);
 		addPersonPage.add(resultsP);
+		addPersonPage.add(backP);
 		
 		addPersonPage.getContentPane().add(BorderLayout.NORTH, mainP);
 		addPersonPage.getContentPane().add(BorderLayout.CENTER, resultsP);
@@ -282,7 +293,7 @@ public class Client extends JFrame implements ActionListener {
 		backbtn.addActionListener(fc);  
 		backP.add(backbtn);
 		
-		
+		//add panels to the frame
 		delPersonPage.add(mainP);
 		delPersonPage.add(resultsP);
 		delPersonPage.add(backP);
@@ -324,7 +335,7 @@ public class Client extends JFrame implements ActionListener {
 		backbtn.addActionListener(fc);  
 		backP.add(backbtn);
 		
-		
+		//add panels to the frame
 		findPersonPage.add(mainP);
 		findPersonPage.add(infoP);
 		findPersonPage.add(backP);
@@ -336,7 +347,7 @@ public class Client extends JFrame implements ActionListener {
 
 	
 
-	public void actionPerformed(ActionEvent evt) {
+	public void actionPerformed(ActionEvent evt){
 		// TODO Auto-generated method stub
 		String event = evt.getActionCommand();
 		
@@ -363,7 +374,8 @@ public class Client extends JFrame implements ActionListener {
 		else if(event.contentEquals("Login")) {
 			//get username and password values
 			String name = username.getText();
-			String pass = password.getText();
+			char[] passC = password.getPassword();
+			String pass = String.valueOf(passC);
 			String combined = "LOGIN," + name + "," + pass;
 			ps.println(combined);
 			
@@ -373,6 +385,9 @@ public class Client extends JFrame implements ActionListener {
 				if(result.equals("Access granted")){
 					loginPage.dispose();
 					userInfoPage.setVisible(true);
+				}
+				else {
+					connection_result.setText("Incorrect login information");
 				}
 			}catch(IOException e) {
 				e.printStackTrace();
@@ -421,8 +436,22 @@ public class Client extends JFrame implements ActionListener {
 			//combine name with DEL command
 			String name = delnametxt.getText();
 			String combined = "DEL," + name;
-			ps.println(combined);
-			delresults.setText(name + " has been deleted from the database");
+			String result = "";
+			try {
+				ps.println(combined);
+				result = in.readLine();
+				System.out.println("Received: " + result);
+			}catch(IOException e) {
+				e.printStackTrace();
+			}
+			
+			if(result.contentEquals("Removal success")) {
+				delresults.setText(name + " has been deleted from the database");
+				delnametxt.setText(null);
+			}
+			else {
+				delresults.setText(result);
+			}
 		}
 		else if(event.contentEquals("Find Member Information")) {
 			findPersonPage.setVisible(true);
@@ -475,7 +504,6 @@ public class Client extends JFrame implements ActionListener {
 			status.setText("Server not active");
 			System.out.println("Could not connect to server");
 		}
-		status.setText("Server connected on port: " +port);		
 		
 	}
 	
