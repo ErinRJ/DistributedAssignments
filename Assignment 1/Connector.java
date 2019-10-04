@@ -139,7 +139,6 @@ public class Connector implements Runnable {
 		int employee_id = 0;
 		//search for employee in database
 		for(int i=0; i < empdb.size(); i++) {
-			System.out.println("Looking through the arraylist: " + empdb.get(i).username);
 			if((empdb.get(i).username).equals(username)) {
 				//send info to client
 				employee_id = i;
@@ -165,6 +164,7 @@ public class Connector implements Runnable {
 		
 	}
 	
+	//generate the hash
 	private static String generateHash(String data, String algorithm) throws NoSuchAlgorithmException {
 		MessageDigest digest = MessageDigest.getInstance(algorithm);
 		digest.reset();
@@ -174,7 +174,7 @@ public class Connector implements Runnable {
 	}
 
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-	
+	//find hex version of hash
 	private static String bytesToStringHex(byte[] bytes) {
 		char [] hexChars = new char[bytes.length*2];
 		for (int i = 0; i < bytes.length; i++) {
@@ -230,8 +230,10 @@ public class Connector implements Runnable {
 			oos.close();
 			fos.close();
 		////		 close input from serialized file
-//			ois.close();
-//			fis.close();
+			ois.close();
+			fis.close();
+			
+			client.close();
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
