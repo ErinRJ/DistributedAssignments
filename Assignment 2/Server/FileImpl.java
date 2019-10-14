@@ -18,4 +18,20 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
          return(null);
       }
    }
+
+   public String button1() throws RemoteException{
+      return "Button 1 has been pressed";
+   }
+   public String button2() throws RemoteException{
+      return "Button 2 has been pressed";
+   }
+   public String button3() throws RemoteException{
+      return "Button 3 has been pressed";
+   }
+   public String button4() throws RemoteException{
+      return "Button 4 has been pressed";
+   }
+   public String button5() throws RemoteException{
+      return "Button 5 has been pressed";
+   }
 }
