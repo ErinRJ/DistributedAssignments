@@ -1,4 +1,6 @@
-import java.io.*; 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.*;
 import java.rmi.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -6,20 +8,27 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 public class FileClient implements ActionListener{
     //swing value for main page (mainFrame)
     static JFrame mainFrame;
     static JFrame viewPostsFrame;
     static JLabel result;
+    static JTextArea usernameT;
     static FileInterface fi;
-
+    String username;
 
     //swing values for the new post frame
     static JFrame newPostFrame;
     static JTextArea locT;
     static JTextArea dogBT;
     static JTextArea durationT;
+
+    //swing values for the view posts frame
+    static JTextArea selectT;
+
     //button action handler
     static FileClient fc = new FileClient();
 
@@ -49,12 +58,23 @@ public class FileClient implements ActionListener{
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setSize(800,300);
 
+        //panel for person's username
+        JPanel usernamePanel = new JPanel();
+        JLabel usernameLabel = new JLabel("Please Enter Username");
+        usernameT = new JTextArea(1,10);
+        usernamePanel.add(usernameLabel);
+        usernamePanel.add(usernameT);
+
         //add buttons for each of the five functions in one panel
         JPanel buttonPanel = new JPanel();
         JButton createBtn = new JButton("Create New Posting");
         JButton viewBtn = new JButton("View Available Postings");
+        JButton viewMyPosts = new JButton("View My Postings");
+        JButton viewMyJobs = new JButton("View My Jobs to do");
         createBtn.addActionListener(fc);
         viewBtn.addActionListener(fc);
+        viewMyPosts.addActionListener(fc);
+        viewMyJobs.addActionListener(fc);
         //add buttons to the panel
         buttonPanel.add(createBtn);
         buttonPanel.add(viewBtn);
@@ -63,16 +83,18 @@ public class FileClient implements ActionListener{
         //create second panel for output from implementation class
         JPanel outputPanel = new JPanel();
         //add label to panel
-        result = new JLabel("Result here");
+        result = new JLabel("Communication result here");
         outputPanel.add(result);
 
        //add the panels to the frame
+       mainFrame.add(usernamePanel);
        mainFrame.add(buttonPanel);
        mainFrame.add(outputPanel);
 
-       mainFrame.getContentPane().add(BorderLayout.NORTH, buttonPanel);
-       mainFrame.getContentPane().add(BorderLayout.CENTER, outputPanel);
-
+       //organize panels on the frame
+       mainFrame.getContentPane().add(BorderLayout.NORTH, usernamePanel);
+       mainFrame.getContentPane().add(BorderLayout.CENTER, buttonPanel);
+       mainFrame.getContentPane().add(BorderLayout.SOUTH, outputPanel);
    }
 
    //create the frame to create new postings
@@ -110,12 +132,20 @@ public class FileClient implements ActionListener{
         submitBtn.addActionListener(fc);
         submitPanel.add(submitBtn);
 
+        //panel for back button
+        JPanel backPanel = new JPanel();
+        //add a button to the panel
+        JButton backBtn = new JButton("BACK");
+        backBtn.addActionListener(fc);
+        backPanel.add(backBtn);
+
         //add the panels to the frame
         newPostFrame.add(infoPanel);
         newPostFrame.add(submitPanel);
         //organize the panels on the frame
         newPostFrame.getContentPane().add(BorderLayout.NORTH, infoPanel);
         newPostFrame.getContentPane().add(BorderLayout.CENTER, submitPanel);
+        newPostFrame.getContentPane().add(BorderLayout.SOUTH, backPanel);
     }
 
     //create the frame to view all postings
@@ -123,59 +153,110 @@ public class FileClient implements ActionListener{
         //create frame with designated sizes
         viewPostsFrame = new JFrame("Pet Sitters: View Available Postings");
         viewPostsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        viewPostsFrame.setSize(800,300);
+        viewPostsFrame.setSize(800,1000);
         Container content = viewPostsFrame.getContentPane();
 
+        //the panel for posting selection
+        JPanel selectionPanel = new JPanel();
+        JLabel selectLabel = new JLabel("Enter the posting # to take");
+        selectT = new JTextArea(1,8);
+        JButton selectBtn = new JButton("Accept Job");
+        selectBtn.addActionListener(fc);
+        //add the elements to the panel
+        selectionPanel.add(selectLabel);
+        selectionPanel.add(selectT);
+        selectionPanel.add(selectBtn);
+
+
+        //the table panel
         JPanel tablePanel = new JPanel();
+
         //get available postings from the database
         String[] positions = fi.viewPosts();
+        System.out.println("Received from the server: " + Arrays.deepToString(positions));
+
+        System.out.println("Posts available in database");
         //each row in this array = one posting
         //separate these by the commas and put into a 2d array
-        String[][] rows = new String[positions.length][3];
+        Object[][] rows = new Object[positions.length][5];
         for(int i = 0; i< positions.length; i++){
-            String[] split = positions[i].split(",");
-            //location
+            Object[] split = positions[i].split(",");
+
+            //position id
             rows[i][0] = split[0];
-            //dog breed
+            //location
             rows[i][1] = split[1];
-            //duration
+            //dog breed
             rows[i][2] = split[2];
+            //duration
+            rows[i][3] = split[3];
+            //availability
+            rows[i][4] = split[4];
         }
         System.out.println(Arrays.deepToString(rows));
-
         //display nicely:
-        Object columns[] = { "Location", "Dog Breed", "Duration" };
+        //declare column headings
+        Object columns[] = { "Posting ID", "Location", "Dog Breed", "Duration", "Job Taken?" };
+
+        //initiate a table model, put in 2d array of rows, and 1d columns array
         DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
         JTable table = new JTable(tableModel);
+
+        //set table properties
         table.setRowHeight(80);
+        table.getColumnModel().getColumn(3).setPreferredWidth(150);
         tablePanel.add(new JScrollPane(table));
+        //panel for back button
+        JPanel backPanel = new JPanel();
+        //add a button to the panel
+        JButton backBtn = new JButton("BACK");
+        backBtn.addActionListener(fc);
+        backPanel.add(backBtn);
+
+
+        //add the panels to the frame
 
         viewPostsFrame.add(tablePanel);
-
-//        JTable table = new JTable(rows, columns);
-//        JScrollPane scrollPane = new JScrollPane(table);
-//        content.add(scrollPane, BorderLayout.CENTER);
-
-        //have "accept" buttons to accept the job posting (in the last column)
+        viewPostsFrame.add(selectionPanel);
+        viewPostsFrame.getContentPane().add(BorderLayout.NORTH, selectionPanel);
+        viewPostsFrame.getContentPane().add(BorderLayout.CENTER, tablePanel);
+        viewPostsFrame.getContentPane().add(BorderLayout.SOUTH, backPanel);
         //remove the job from the database
         //fi.removePost();
     }
 
+    //listener for each button click
     public void actionPerformed(ActionEvent evt){
         String event = evt.getActionCommand();
         try {
             if (event.contentEquals("Create New Posting")){
+                username = usernameT.getText();
                 newPostFrame.setVisible(true);
             } else if (event.contentEquals("View Available Postings")) {
+                username = usernameT.getText();
                 createViewPostsPage(fc);
                 viewPostsFrame.setVisible(true);
             } else if (event.contentEquals("SUBMIT")) {
                 System.out.println("New posting information submitted");
+                String user = username;
                 //send the information to the server
-                fi.createPost(locT.getText(), dogBT.getText(), durationT.getText());
-            } else if (event.contentEquals("Button 4")) {
-                String result = fi.button4();
-                System.out.println(result);
+                fi.createPost(locT.getText(), dogBT.getText(), durationT.getText(), user);
+                locT.setText("");
+                dogBT.setText("");
+                durationT.setText("");
+            } else if (event.contentEquals("BACK")) {
+                newPostFrame.dispose();
+                viewPostsFrame.dispose();
+            } else if (event.contentEquals("Accept Job")) {
+                String job = selectT.getText();
+                String user = username;
+                int jobInt = Integer.parseInt(job);
+                System.out.println(job + " has been accepted");
+                //remove the job from the available database
+                fi.removePost(jobInt, user);
+                //refresh the frame
+                viewPostsFrame.dispose();
+
             } else if (event.contentEquals("Button 5")) {
                 String result = fi.button5();
                 System.out.println(result);

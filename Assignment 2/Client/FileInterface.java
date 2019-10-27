@@ -5,9 +5,9 @@ public interface FileInterface extends Remote {
     //name of registry
     public final static String SERVICENAME = "hello";
     //function to be called
-    public String createPost(String location, String dog, String duration) throws RemoteException;
+    public void createPost(String location, String dog, String duration, String owner) throws RemoteException;
     public String[] viewPosts() throws RemoteException;
-    public String button3() throws RemoteException;
+    public void removePost(int job, String sitter) throws RemoteException;
     public String button4() throws RemoteException;
     public String button5() throws RemoteException;
 }
