@@ -3,7 +3,9 @@ import java.rmi.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class FileClient implements ActionListener{
     //swing value for main page (mainFrame)
@@ -18,14 +20,14 @@ public class FileClient implements ActionListener{
     static JTextArea locT;
     static JTextArea dogBT;
     static JTextArea durationT;
+    //button action handler
+    static FileClient fc = new FileClient();
 
     public static void main(String argv[]) {
-        //button action handler
-        FileClient fc = new FileClient();
+
         //create the main page
         createMainPage(fc);
         createNewPostPage(fc);
-        createViewPostsPage(fc);
 
         mainFrame.setVisible(true);
         //connect to the server
@@ -117,11 +119,46 @@ public class FileClient implements ActionListener{
     }
 
     //create the frame to view all postings
-    public static void createViewPostsPage(FileClient fc) {
+    public static void createViewPostsPage(FileClient fc) throws RemoteException {
         //create frame with designated sizes
         viewPostsFrame = new JFrame("Pet Sitters: View Available Postings");
         viewPostsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         viewPostsFrame.setSize(800,300);
+        Container content = viewPostsFrame.getContentPane();
+
+        JPanel tablePanel = new JPanel();
+        //get available postings from the database
+        String[] positions = fi.viewPosts();
+        //each row in this array = one posting
+        //separate these by the commas and put into a 2d array
+        String[][] rows = new String[positions.length][3];
+        for(int i = 0; i< positions.length; i++){
+            String[] split = positions[i].split(",");
+            //location
+            rows[i][0] = split[0];
+            //dog breed
+            rows[i][1] = split[1];
+            //duration
+            rows[i][2] = split[2];
+        }
+        System.out.println(Arrays.deepToString(rows));
+
+        //display nicely:
+        Object columns[] = { "Location", "Dog Breed", "Duration" };
+        DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
+        JTable table = new JTable(tableModel);
+        table.setRowHeight(80);
+        tablePanel.add(new JScrollPane(table));
+
+        viewPostsFrame.add(tablePanel);
+
+//        JTable table = new JTable(rows, columns);
+//        JScrollPane scrollPane = new JScrollPane(table);
+//        content.add(scrollPane, BorderLayout.CENTER);
+
+        //have "accept" buttons to accept the job posting (in the last column)
+        //remove the job from the database
+        //fi.removePost();
     }
 
     public void actionPerformed(ActionEvent evt){
@@ -130,6 +167,7 @@ public class FileClient implements ActionListener{
             if (event.contentEquals("Create New Posting")){
                 newPostFrame.setVisible(true);
             } else if (event.contentEquals("View Available Postings")) {
+                createViewPostsPage(fc);
                 viewPostsFrame.setVisible(true);
             } else if (event.contentEquals("SUBMIT")) {
                 System.out.println("New posting information submitted");

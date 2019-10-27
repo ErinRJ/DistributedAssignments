@@ -3,6 +3,7 @@ import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class FileImpl extends UnicastRemoteObject implements FileInterface {
@@ -59,8 +60,17 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
        }
        return null;
    }
-   public String viewPosts() throws RemoteException{
-       return null;
+   public String[] viewPosts() throws RemoteException{
+       //return postingsDB as an array;
+       String[] array = new String[postingsDB.size()];
+       //loop through the arraylist of posting objects
+       //add each row to the array
+       System.out.println("Before entering loop");
+       for(int i=0; i<postingsDB.size(); i++){
+           array[i] = postingsDB.get(i).location + "," + postingsDB.get(i).dogB + "," +  postingsDB.get(i).duration;
+       }
+       System.out.println(Arrays.deepToString(array));
+       return array;
    }
    public String button3() throws RemoteException{
       return "Button 3 has been pressed";
