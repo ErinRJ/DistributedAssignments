@@ -5,9 +5,10 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+//this class describes all the functionalities declared in the interfaces
+//sends requested information to the client
 
 public class FileImpl extends UnicastRemoteObject implements FileInterface {
-
     //declare postings 'database'
     static ArrayList<Posting> postingsDB = null;
     //to communicate with the postings database
@@ -49,13 +50,15 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
         oos.flush();
     }
 
-    //CREATE POST == DONE
+    //create the post from information submitted by the client
    public void createPost(String location, String dog, String duration, String owner) throws RemoteException{
        //state the information received from the client
        System.out.println("RECEIVED: " + location + ", " + dog + ", " + duration + "," + owner);
        int size = postingsDB.size() + 1;
+
        //add the new information to the database of postings
        postingsDB.add(new Posting(size, location, dog, duration, owner, false, "null"));
+
        //save the results by serializing it
        try {
            serializeDb();
@@ -64,6 +67,7 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
        }
    }
 
+   //view all posts created so far
    public String[] viewPosts() throws RemoteException{
        //check if database is empty
        //needs to be updated to include already marked ones
@@ -85,7 +89,7 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
        }
    }
 
-   //find all of the posted submitted by the user
+   //find all of the posts submitted by the user
    public Object[] viewPersonalPosts(String owner) throws RemoteException{
        //search through the database, collect all postings by that owner
        //put in arraylist, then array
@@ -116,8 +120,8 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
         return array;
     }
 
-   //REMOVE POST == DONE
-   public void removePost(int job, String sitter) throws RemoteException{
+
+   public void changeAvailability(int job, String sitter) throws RemoteException{
        //find the job, set the accepted flag to true and the sitter name. Don't remove from the database
        for(int i=0; i<postingsDB.size(); i++){
            if(postingsDB.get(i).id == (job)){
@@ -135,12 +139,5 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
        } catch (IOException e) {
            e.printStackTrace();
        }
-   }
-
-   public String button4() throws RemoteException{
-      return "Button 4 has been pressed";
-   }
-   public String button5() throws RemoteException{
-      return "Button 5 has been pressed";
    }
 }

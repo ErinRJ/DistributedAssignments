@@ -1,5 +1,6 @@
 import java.io.Serializable;
 
+//this class holds all posting information submitted by the clients
 public class Posting implements Serializable {
     int id;
     String location;

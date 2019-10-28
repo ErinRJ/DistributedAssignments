@@ -2,6 +2,7 @@ import java.io.*;
 import java.rmi.*;
 import java.rmi.registry.*;
 
+//this class binds the implementation class to the registry
 public class FileServer {
    public static void main(String argv[]) {
          System.out.println("Server started");
