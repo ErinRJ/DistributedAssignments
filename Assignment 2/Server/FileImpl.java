@@ -23,7 +23,7 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
    }
 
    //check if the database already exists, if not create one
-   public void checkExists() throws IOException, ClassNotFoundException {
+   private void checkExists() throws IOException, ClassNotFoundException {
        System.out.println("Checking for exisiting databases");
        // Open existing fitness patrons database, if it doesn't exist, create one
        File tempfile = new File("postings.out");
@@ -75,32 +75,46 @@ public class FileImpl extends UnicastRemoteObject implements FileInterface {
        }
        else {
            //return postingsDB as an array
-           String[] array = new String[postingsDB.size()];
+           String[] array;
+           array = new String[postingsDB.size()];
            for (int i = 0; i < postingsDB.size(); i++) {
                array[i] = String.valueOf(postingsDB.get(i).id) + "," + postingsDB.get(i).location + ","
                        + postingsDB.get(i).dogB + "," + postingsDB.get(i).duration + "," + postingsDB.get(i).accepted;
            }
-
-//           int arraysize = 0;
-           //find the number of currently active postings
-//           for (Posting posting : postingsDB) {
-//               if (!posting.accepted) {
-//                   arraysize++;
-//               }
-//           }
-//           System.out.println("The size of the array to be sent to table is "+ arraysize);
-//           //create an array to hold the active postings
-//           String[] array = new String[arraysize];
-//           //loop through the arraylist of posting objects, take only those that have false flags
-//           //add each row to the array
-//           for (int i = 0; i < postingsDB.size(); i++) {
-//               if (!postingsDB.get(i).accepted) {
-//                   array[i] = String.valueOf(postingsDB.get(i).id) + "," + postingsDB.get(i).location + "," + postingsDB.get(i).dogB + "," + postingsDB.get(i).duration;
-//               }
-//           }
            return array;
        }
    }
+
+   //find all of the posted submitted by the user
+   public Object[] viewPersonalPosts(String owner) throws RemoteException{
+       //search through the database, collect all postings by that owner
+       //put in arraylist, then array
+       ArrayList<String> list = new ArrayList<String>();
+       for (Posting posting : postingsDB) {
+           if ((posting.owner).equals(owner)) {
+               list.add(String.valueOf(posting.id) + "," + posting.location + ","
+                       + posting.dogB + "," + posting.duration + "," + posting.owner + ","
+                       + posting.accepted + "," + posting.sitter);
+           }
+       }
+       Object[] array = list.toArray();
+       return array;
+   }
+
+   //find all the jobs taken by the sitter
+    public Object[] viewJobsTaken(String sitter) throws RemoteException{
+        //search through the database, collect all jobs taken by that sitter
+        ArrayList<String> list = new ArrayList<String>();
+        for (Posting posting : postingsDB) {
+            if ((posting.sitter).equals(sitter)) {
+                list.add(String.valueOf(posting.id) + "," + posting.location + ","
+                        + posting.dogB + "," + posting.duration + "," + posting.owner + ","
+                        + posting.accepted + "," + posting.sitter);
+            }
+        }
+        Object[] array = list.toArray();
+        return array;
+    }
 
    //REMOVE POST == DONE
    public void removePost(int job, String sitter) throws RemoteException{

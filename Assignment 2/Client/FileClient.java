@@ -1,6 +1,3 @@
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.*;
 import java.rmi.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,17 +5,17 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 public class FileClient implements ActionListener{
     //swing value for main page (mainFrame)
     static JFrame mainFrame;
     static JFrame viewPostsFrame;
+    static JFrame viewMyPostsFrame;
+    static JFrame viewJobs;
     static JLabel result;
     static JTextArea usernameT;
     static FileInterface fi;
-    String username;
+    static String username;
 
     //swing values for the new post frame
     static JFrame newPostFrame;
@@ -28,6 +25,7 @@ public class FileClient implements ActionListener{
 
     //swing values for the view posts frame
     static JTextArea selectT;
+
 
     //button action handler
     static FileClient fc = new FileClient();
@@ -78,6 +76,8 @@ public class FileClient implements ActionListener{
         //add buttons to the panel
         buttonPanel.add(createBtn);
         buttonPanel.add(viewBtn);
+        buttonPanel.add(viewMyPosts);
+        buttonPanel.add(viewMyJobs);
 
 
         //create second panel for output from implementation class
@@ -213,17 +213,140 @@ public class FileClient implements ActionListener{
         backBtn.addActionListener(fc);
         backPanel.add(backBtn);
 
-
         //add the panels to the frame
-
         viewPostsFrame.add(tablePanel);
         viewPostsFrame.add(selectionPanel);
         viewPostsFrame.getContentPane().add(BorderLayout.NORTH, selectionPanel);
         viewPostsFrame.getContentPane().add(BorderLayout.CENTER, tablePanel);
         viewPostsFrame.getContentPane().add(BorderLayout.SOUTH, backPanel);
-        //remove the job from the database
-        //fi.removePost();
     }
+
+    //create the frame to view all postings
+    public static void createViewMyPostsPage(FileClient fc, Object[] postings) throws RemoteException {
+        //create frame with designated sizes
+        viewMyPostsFrame = new JFrame("Pet Sitters: View My Postings");
+        viewMyPostsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        viewMyPostsFrame.setSize(800,1000);
+        Container content = viewMyPostsFrame.getContentPane();
+
+        //the table panel
+        JPanel tablePanel = new JPanel();
+        //convert the objects array to a string array
+        String[] stringArray = Arrays.copyOf(postings, postings.length, String[].class);
+
+        System.out.println("Received from the server: " + Arrays.deepToString(postings));
+
+        //each row in this array = one posting
+        //separate these by the commas and put into a 2d array
+        Object[][] rows = new Object[postings.length][7];
+        for(int i = 0; i< postings.length; i++){
+            String[] split = stringArray[i].split(",");
+            //position id
+            rows[i][0] = split[0];
+            //location
+            rows[i][1] = split[1];
+            //dog breed
+            rows[i][2] = split[2];
+            //duration
+            rows[i][3] = split[3];
+            //owner
+            rows[i][4] = split[4];
+            //availability
+            rows[i][5] = split[5];
+            //sitter
+            rows[i][6] = split[6];
+
+        }
+        System.out.println(Arrays.deepToString(rows));
+        //display nicely:
+        //declare column headings
+        Object columns[] = { "Posting ID", "Location", "Dog Breed", "Duration", "Owner", "Job Taken?", "Sitter" };
+
+        //initiate a table model, put in 2d array of rows, and 1d columns array
+        DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
+        JTable table = new JTable(tableModel);
+
+        //set table properties
+        table.setRowHeight(80);
+        table.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tablePanel.add(new JScrollPane(table));
+        //panel for back button
+        JPanel backPanel = new JPanel();
+        //add a button to the panel
+        JButton backBtn = new JButton("BACK");
+        backBtn.addActionListener(fc);
+        backPanel.add(backBtn);
+
+        //add the panels to the frame
+        viewMyPostsFrame.add(tablePanel);
+        viewMyPostsFrame.getContentPane().add(BorderLayout.CENTER, tablePanel);
+        viewMyPostsFrame.getContentPane().add(BorderLayout.SOUTH, backPanel);
+    }
+
+    //create the frame to view all postings
+    public static void createViewJobsTakenPage(FileClient fc, Object[] jobs) throws RemoteException {
+        //create frame with designated sizes
+        viewJobs = new JFrame("Pet Sitters: View My Postings");
+        viewJobs.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        viewJobs.setSize(800,1000);
+        Container content = viewJobs.getContentPane();
+
+        //the table panel
+        JPanel tablePanel = new JPanel();
+        //convert the objects array to a string array
+        String[] stringArray = Arrays.copyOf(jobs, jobs.length, String[].class);
+
+        System.out.println("Received from the server: " + Arrays.deepToString(jobs));
+
+        //each row in this array = one posting
+        //separate these by the commas and put into a 2d array
+        Object[][] rows = new Object[jobs.length][7];
+        for(int i = 0; i< jobs.length; i++){
+            String[] split = stringArray[i].split(",");
+            //position id
+            rows[i][0] = split[0];
+            //location
+            rows[i][1] = split[1];
+            //dog breed
+            rows[i][2] = split[2];
+            //duration
+            rows[i][3] = split[3];
+            //owner
+            rows[i][4] = split[4];
+            //availability
+            rows[i][5] = split[5];
+            //sitter
+            rows[i][6] = split[6];
+
+        }
+        System.out.println(Arrays.deepToString(rows));
+        //display nicely:
+        //declare column headings
+        Object columns[] = { "Posting ID", "Location", "Dog Breed", "Duration", "Owner", "Job Taken?", "Sitter" };
+
+        //initiate a table model, put in 2d array of rows, and 1d columns array
+        DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
+        JTable table = new JTable(tableModel);
+
+        //set table properties
+        table.setRowHeight(80);
+        table.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tablePanel.add(new JScrollPane(table));
+        //panel for back button
+        JPanel backPanel = new JPanel();
+        //add a button to the panel
+        JButton backBtn = new JButton("BACK");
+        backBtn.addActionListener(fc);
+        backPanel.add(backBtn);
+
+        //add the panels to the frame
+        viewJobs.add(tablePanel);
+        viewJobs.getContentPane().add(BorderLayout.CENTER, tablePanel);
+        viewJobs.getContentPane().add(BorderLayout.SOUTH, backPanel);
+    }
+
+
+
 
     //listener for each button click
     public void actionPerformed(ActionEvent evt){
@@ -247,6 +370,8 @@ public class FileClient implements ActionListener{
             } else if (event.contentEquals("BACK")) {
                 newPostFrame.dispose();
                 viewPostsFrame.dispose();
+                viewMyPostsFrame.dispose();
+                viewJobs.dispose();
             } else if (event.contentEquals("Accept Job")) {
                 String job = selectT.getText();
                 String user = username;
@@ -257,9 +382,21 @@ public class FileClient implements ActionListener{
                 //refresh the frame
                 viewPostsFrame.dispose();
 
-            } else if (event.contentEquals("Button 5")) {
-                String result = fi.button5();
-                System.out.println(result);
+            } else if (event.contentEquals("View My Jobs to do")) {
+                System.out.println("This person wants to see their posts");
+                username = usernameT.getText();
+                //get available postings from the database
+                Object[] jobs = fi.viewJobsTaken(username);
+                createViewJobsTakenPage(fc, jobs);
+                viewJobs.setVisible(true);
+            }
+            else if (event.contentEquals("View My Postings")) {
+                System.out.println("This person wants to see the jobs they've taken");
+                username = usernameT.getText();
+                //get available postings from the database
+                Object[] postings = fi.viewPersonalPosts(username);
+                createViewMyPostsPage(fc, postings);
+                viewMyPostsFrame.setVisible(true);
             }
         }catch(RemoteException e){
             e.printStackTrace();
